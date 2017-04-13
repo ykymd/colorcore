@@ -48,6 +48,7 @@ class Controller(object):
         self.cache_factory = cache_factory
         self.event_loop = event_loop
         self.convert = Convert(configuration.asset_byte)
+        bitcoin.SelectParams('testnet')
 
     @asyncio.coroutine
     def getbalance(self,
@@ -212,6 +213,10 @@ class Controller(object):
         builder = openassets.transactions.TransactionBuilder(self.configuration.dust_limit)
         colored_outputs = yield from self._get_unspent_outputs(from_address)
 
+        print("to:")
+        print(to_address.to_scriptPubKey())
+        print("from:")
+        print(from_address.to_scriptPubKey())
         issuance_parameters = openassets.transactions.TransferParameters(
             colored_outputs, to_address.to_scriptPubKey(), from_address.to_scriptPubKey(), self._as_int(amount))
 

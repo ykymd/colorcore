@@ -25,6 +25,7 @@
 import bitcoin.base58
 import bitcoin.wallet
 
+
 class Base58Address(bytes):
     """Represents a Base58-encoded address. It includes a version, checksum and namespace."""
 
