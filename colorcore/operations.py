@@ -37,6 +37,12 @@ import math
 import openassets.protocol
 import openassets.transactions
 
+import MySQLdb
+import datetime
+import pytz
+import time
+import functools
+
 
 class Controller(object):
     """Contains all operations provided by Colorcore."""
@@ -284,6 +290,45 @@ class Controller(object):
                 result.append(self.tx_parser((yield from self._process_transaction(transaction, mode))))
 
             return result
+
+    # dateはyyyy-MM-dd
+    @asyncio.coroutine
+    def test(self, asset, date):
+        DBUSER = ""
+        DBPASS = ""
+        DBNAME = ""
+        TABLENAME = ""
+        conn = MySQLdb.connect(
+            user=DBUSER,
+            passwd=DBPASS,
+            host='localhost',
+            db=DBNAME,
+            charset='utf8',
+            init_command='SET NAMES UTF8'
+        )
+        dateArray = list(map(int, date.split("-")))
+        # print(dateArray)
+        if len(dateArray) != 3:
+            return "invalid date format"
+
+        beginTime = int(time.mktime(datetime.datetime(dateArray[0], dateArray[1], dateArray[2], tzinfo=pytz.timezone('Asia/Tokyo')).timetuple()))
+        endTime = int(time.mktime(datetime.datetime(dateArray[0], dateArray[1], dateArray[2] + 1, tzinfo=pytz.timezone('Asia/Tokyo')).timetuple()))
+        print(beginTime)
+        print(endTime)
+
+        c = conn.cursor()
+        sql = 'select * from {0} where timestamp >= {1} and timestamp <= {2} \
+        and asset_id = \'{3}\''.format(
+            TABLENAME,
+            beginTime,
+            endTime,
+            asset
+        )
+        c.execute(sql)
+        allList = c.fetchall()
+        if len(allList) == 0:
+            return 0
+        return functools.reduce(lambda x, y: x + y, list(map(lambda x: x[4], allList)))
 
     @staticmethod
     def _calculate_distribution(output_value, price, fees, dust_limit):
