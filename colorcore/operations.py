@@ -54,7 +54,6 @@ class Controller(object):
         self.cache_factory = cache_factory
         self.event_loop = event_loop
         self.convert = Convert(configuration.asset_byte)
-        bitcoin.SelectParams('testnet')
 
     @asyncio.coroutine
     def getbalance(self,
