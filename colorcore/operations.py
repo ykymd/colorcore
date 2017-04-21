@@ -42,7 +42,7 @@ import datetime
 import pytz
 import time
 import functools
-
+import configparser
 
 class Controller(object):
     """Contains all operations provided by Colorcore."""
@@ -54,6 +54,8 @@ class Controller(object):
         self.cache_factory = cache_factory
         self.event_loop = event_loop
         self.convert = Convert(configuration.asset_byte)
+        self.config = configparser.ConfigParser()
+        self.config.read("config.ini")
 
     @asyncio.coroutine
     def getbalance(self,
@@ -293,14 +295,15 @@ class Controller(object):
     # dateはyyyy-MM-dd
     @asyncio.coroutine
     def getdistamount(self, asset, date):
-        DBUSER = ""
-        DBPASS = ""
-        DBNAME = ""
-        TABLENAME = ""
+        DBUSER = self.config["dbuser"]["name"]
+        DBPASS = self.config["dbuser"]["pass"]
+        DBNAME = self.config["db"]["dbname"]
+        TABLENAME = self.config["db"]["tablename"]
+        HOST = self.config["db"]["host"]
         conn = MySQLdb.connect(
             user=DBUSER,
             passwd=DBPASS,
-            host='localhost',
+            host=HOST,
             db=DBNAME,
             charset='utf8',
             init_command='SET NAMES UTF8'
