@@ -332,6 +332,35 @@ class Controller(object):
             return 0
         return functools.reduce(lambda x, y: x + y, list(map(lambda x: x[6], allList)))
 
+    # 特定のアドレスに向けた全トランザクションを取得する
+    @asyncio.coroutine
+    def getassettransaction(self, asset, address):
+        DBUSER = self.config["dbuser"]["name"]
+        DBPASS = self.config["dbuser"]["pass"]
+        DBNAME = self.config["db"]["dbname"]
+        TABLENAME = self.config["db"]["tablename"]
+        HOST = self.config["db"]["host"]
+        conn = MySQLdb.connect(
+            user=DBUSER,
+            passwd=DBPASS,
+            host=HOST,
+            db=DBNAME,
+            charset='utf8',
+            init_command='SET NAMES UTF8'
+        )
+        c = conn.cursor()
+        sql = 'select * from %s where (address = \'%s\' or to = \'%s\') \
+            and asset_id = \'%s\'' % (
+            TABLENAME,
+            address,
+            address,
+            asset
+        )
+        c.execute(sql)
+        allList = c.fetchall()
+        print(allList)
+        return allList
+
     @staticmethod
     def _calculate_distribution(output_value, price, fees, dust_limit):
         effective_amount = output_value - fees - dust_limit
