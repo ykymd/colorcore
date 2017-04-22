@@ -330,7 +330,7 @@ class Controller(object):
         allList = c.fetchall()
         if len(allList) == 0:
             return 0
-        return functools.reduce(lambda x, y: x + y, list(map(lambda x: x[5], allList)))
+        return functools.reduce(lambda x, y: x + y, list(map(lambda x: x[6], allList)))
 
     @staticmethod
     def _calculate_distribution(output_value, price, fees, dust_limit):

@@ -98,4 +98,4 @@ ENV/
 # mkdocs documentation
 /site
 
-
+cache.db
