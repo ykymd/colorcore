@@ -355,7 +355,7 @@ class Controller(object):
         allTx = []
         for tx in allList:
             txData = {}
-            if tx[2] is address:
+            if tx[2] == address:
                 txData["type"] = "receive"
                 txData["target"] = tx[3]
             else:
