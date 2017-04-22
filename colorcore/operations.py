@@ -349,10 +349,9 @@ class Controller(object):
             init_command='SET NAMES UTF8'
         )
         c = conn.cursor()
-        sql = 'select * from ' + TABLENAME + ' where (address = %s or to = %s) and asset_id = %s'
+        sql = 'select * from ' + TABLENAME + ' where (`address` = %s or `from` = %s) and `asset_id` = %s'
         c.execute(sql, (address, address, asset))
         allList = c.fetchall()
-        print(allList)
         return allList
 
     @staticmethod
