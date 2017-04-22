@@ -334,7 +334,7 @@ class Controller(object):
 
     # 特定のアドレスに向けた全トランザクションを取得する
     @asyncio.coroutine
-    def getassettransaction(self, asset, address):
+    def getassettransaction(self, asset, address, limit=0):
         DBUSER = self.config["dbuser"]["name"]
         DBPASS = self.config["dbuser"]["pass"]
         DBNAME = self.config["db"]["dbname"]
@@ -349,7 +349,9 @@ class Controller(object):
             init_command='SET NAMES UTF8'
         )
         c = conn.cursor()
-        sql = 'select * from ' + TABLENAME + ' where (`address` = %s or `from` = %s) and `asset_id` = %s'
+        sql = 'select * from ' + TABLENAME + ' where (`address` = %s or `from` = %s) and `asset_id` = %s order by timestamp DESC'
+        if limit != 0:
+            sql += ' limit %d' % limit
         c.execute(sql, (address, address, asset))
         allList = c.fetchall()
         allTx = []
