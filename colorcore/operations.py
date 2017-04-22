@@ -352,7 +352,19 @@ class Controller(object):
         sql = 'select * from ' + TABLENAME + ' where (`address` = %s or `from` = %s) and `asset_id` = %s'
         c.execute(sql, (address, address, asset))
         allList = c.fetchall()
-        return allList
+        allTx = []
+        for tx in allList:
+            txData = {}
+            if tx[2] is address:
+                txData["type"] = "receive"
+                txData["target"] = tx[3]
+            else:
+                txData["type"] = "send"
+                txData["target"] = tx[2]
+            txData["amount"] = tx[6]
+            txData["time"] = tx[7]
+            allTx.append(txData)
+        return allTx
 
     @staticmethod
     def _calculate_distribution(output_value, price, fees, dust_limit):
