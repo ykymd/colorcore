@@ -44,6 +44,9 @@ import time
 import functools
 import configparser
 
+from bitcoinrpc.authproxy import AuthServiceProxy
+
+
 class Controller(object):
     """Contains all operations provided by Colorcore."""
 
@@ -56,11 +59,12 @@ class Controller(object):
         self.convert = Convert(configuration.asset_byte)
         self.config = configparser.ConfigParser()
         self.config.read("config.ini")
+        # bitcoin.SelectParams('testnet')
 
     @asyncio.coroutine
     def getbalance(self,
         address: "Obtain the balance of this address only, or all addresses if unspecified"=None,
-        minconf: "The minimum number of confirmations (inclusive)"='1',
+        minconf: "The minimum number of confirmations (inclusive)"='0',
         maxconf: "The maximum number of confirmations (inclusive)"='9999999'
     ):
         """Obtains the balance of the wallet or an address."""
@@ -291,6 +295,66 @@ class Controller(object):
                 result.append(self.tx_parser((yield from self._process_transaction(transaction, mode))))
 
             return result
+
+    @asyncio.coroutine
+    def createnewuser(self):#,
+        #asset_id,
+        #asset_amount,
+        #btc_amount,
+        #fromassetaddress,
+        #frombtcaddress=fromassetaddress
+    #):
+        hostURL = "http://%s:%s@%s:%s" % (
+            self.config["rpcuser"]["rpcid"],
+            self.config["rpcuser"]["rpcpass"],
+            self.config["rpcsetting"]["host"],
+            self.config["rpcsetting"]["port"]
+        )
+        rpcConnection = AuthServiceProxy(hostURL)
+        return rpcConnection.getnewaddress()
+        """
+        for to in toaddresses:
+            oa_address = str(colorcore.addresses.Base58Address(
+                    to, to.nVersion, self.configuration.namespace))
+            # btc送金
+            yield from self.sendbitcoin(self, frombtcaddress, btc_amount, to)
+            # asset送金
+            yield from self.sendasset(self, fromassetaddress, asset_id, asset_amount, oa_address)
+        """
+
+    # BTC用のプール作成
+    @asyncio.coroutine
+    def createbitcoinpool(self):
+        hostURL = "http://%s:%s@%s:%s" % (
+            self.config["rpcuser"]["rpcid"],
+            self.config["rpcuser"]["rpcpass"],
+            self.config["rpcsetting"]["host"],
+            self.config["rpcsetting"]["port"]
+        )
+        rpcConnection = AuthServiceProxy(hostURL)
+        return rpcConnection.getnewaddress("admin")
+
+    @asyncio.coroutine
+    def getbitcoinpool(self):
+        hostURL = "http://%s:%s@%s:%s" % (
+            self.config["rpcuser"]["rpcid"],
+            self.config["rpcuser"]["rpcpass"],
+            self.config["rpcsetting"]["host"],
+            self.config["rpcsetting"]["port"]
+        )
+        rpcConnection = AuthServiceProxy(hostURL)
+        return rpcConnection.getaddressesbyaccount("admin")
+
+    @asyncio.coroutine
+    def setaccounttoaddress(self, account, address):
+        hostURL = "http://%s:%s@%s:%s" % (
+            self.config["rpcuser"]["rpcid"],
+            self.config["rpcuser"]["rpcpass"],
+            self.config["rpcsetting"]["host"],
+            self.config["rpcsetting"]["port"]
+        )
+        rpcConnection = AuthServiceProxy(hostURL)
+        return rpcConnection.setaccount(address, account)
 
     # dateはyyyy-MM-dd
     @asyncio.coroutine
