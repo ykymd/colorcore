@@ -99,3 +99,5 @@ ENV/
 /site
 
 cache.db
+nohup.out
+

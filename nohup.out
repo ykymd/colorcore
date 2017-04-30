@@ -1,0 +1,14 @@
+Starting RPC server on port 8080...
+1492646400
+1492732800
+Exception ignored in: <bound method BaseEventLoop.__del__ of <_UnixSelectorEventLoop running=False closed=True debug=False>>
+Traceback (most recent call last):
+  File "/usr/lib/python3.5/asyncio/base_events.py", line 431, in __del__
+    self.close()
+  File "/usr/lib/python3.5/asyncio/unix_events.py", line 58, in close
+    self.remove_signal_handler(sig)
+  File "/usr/lib/python3.5/asyncio/unix_events.py", line 139, in remove_signal_handler
+    signal.signal(sig, handler)
+  File "/usr/lib/python3.5/signal.py", line 47, in signal
+    handler = _signal.signal(_enum_to_int(signalnum), _enum_to_int(handler))
+TypeError: signal handler must be signal.SIG_IGN, signal.SIG_DFL, or a callable object
