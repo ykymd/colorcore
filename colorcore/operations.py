@@ -59,7 +59,7 @@ class Controller(object):
         self.convert = Convert(configuration.asset_byte)
         self.config = configparser.ConfigParser()
         self.config.read("config.ini")
-        # bitcoin.SelectParams('testnet')
+        #bitcoin.SelectParams('testnet')
 
     @asyncio.coroutine
     def getbalance(self,
@@ -223,11 +223,6 @@ class Controller(object):
 
         builder = openassets.transactions.TransactionBuilder(self.configuration.dust_limit)
         colored_outputs = yield from self._get_unspent_outputs(from_address)
-
-        print("to:")
-        print(to_address.to_scriptPubKey())
-        print("from:")
-        print(from_address.to_scriptPubKey())
         issuance_parameters = openassets.transactions.TransferParameters(
             colored_outputs, to_address.to_scriptPubKey(), from_address.to_scriptPubKey(), self._as_int(amount))
 
@@ -431,6 +426,33 @@ class Controller(object):
             txData["time"] = tx[7]
             allTx.append(txData)
         return allTx
+
+    @asyncio.coroutine
+    def getassetmetadata(self, asset):
+        # DBの中にあるか検索
+        DBUSER = self.config["dbuser"]["name"]
+        DBPASS = self.config["dbuser"]["pass"]
+        DBNAME = self.config["db"]["dbname"]
+        TABLENAME = self.config["db"]["tablename"]
+        TABLENAME2 = "asset_metadata"
+        HOST = self.config["db"]["host"]
+        conn = MySQLdb.connect(
+            user=DBUSER,
+            passwd=DBPASS,
+            host=HOST,
+            db=DBNAME,
+            charset='utf8',
+            init_command='SET NAMES UTF8'
+        )
+        c = conn.cursor()
+        sql = 'select metadata from ' + TABLENAME2 + ' where `asset_id` = %s'
+        c.execute(sql, asset)
+        allList = c.fetchall()
+        for data in allList:
+            if len(data) > 0:
+                return data
+        # なかったらtxから探す
+        return ""
 
     @staticmethod
     def _calculate_distribution(output_value, price, fees, dust_limit):

@@ -148,6 +148,19 @@ class RpcServer(aiohttp.server.ServerHttpProtocol):
             except ControllerError as error:
                 return (yield from self.error(201, str(error), message))
             except openassets.transactions.TransactionBuilderError as error:
+                """
+                connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+                channel = connection.channel()
+                channel.basic_publish(
+                    exchange='oa_transaction',
+                    routing_key='',
+                    body='sendasset {"address":"bXCzfvijxeREoHiV82nawC2TUx9try6RndH","asset":"AWEi7FLBjHTozeGkQR7Qh5Jen9yE7v4vPY","amount":10,"to":"bXCzfvijxeREoHiV82nawC2TUx9try6RndH"}',
+                    properties=pika.BasicProperties(
+                        headers={'x-delay': 5000}
+                    )
+                )
+                print("[x]Sent Resend Queue")
+                """
                 return (yield from self.error(301, type(error).__name__, message))
             except NotImplementedError as error:
                 return (yield from self.error(202, str(error), message))
