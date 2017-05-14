@@ -43,8 +43,9 @@ import pytz
 import time
 import functools
 import configparser
-import colorcore.oautil
 import binascii
+import hashlib
+import base58
 
 from bitcoinrpc.authproxy import AuthServiceProxy
 
@@ -230,8 +231,34 @@ class Controller(object):
 
         transaction = builder.issue(issuance_parameters, bytes(metadata, encoding='utf-8'), self._get_fees(fees))
 
-        assetId = oautil.getAssetId(binascii.hexlify(to_address.to_scriptPubKey()), True)
-        print(assetId)
+        assetId = getAssetId(binascii.hexlify(to_address.to_scriptPubKey()), True)
+        DBUSER = self.config["dbuser"]["name"]
+        DBPASS = self.config["dbuser"]["pass"]
+        DBNAME = self.config["db"]["dbname"]
+        TABLENAME = self.config["db"]["tablename"]
+        HOST = self.config["db"]["host"]
+        conn = MySQLdb.connect(
+            user=DBUSER,
+            passwd=DBPASS,
+            host=HOST,
+            db=DBNAME,
+            charset='utf8',
+            init_command='SET NAMES UTF8'
+        )
+        c = conn.cursor()
+        # 既存のレコードを探す
+        sql = 'select asset_id, metadata from asset_metadata where asset_id = %s'
+        c.execute(sql, (assetId))
+        allList = c.fetchall()
+        if len(allList) == 0:
+            sql = 'insert into asset_metadata values (%s, %s)'
+            c.execute(sql, (assetId, metadata))
+        elif len(metadata) > 0:
+            sql = 'update asset_metadata set metadata = %s WHERE asset_id = %s'
+            c.execute(sql, (metadata, assetId))
+        dbconn.commit()
+        c.close()
+        dbconn.close()
         #return self.tx_parser((yield from self._process_transaction(transaction, mode)))
         return ""
 
@@ -611,3 +638,35 @@ class Convert(object):
         address = cls.script_to_address(script)
         return str(address) if address is not None else "Unknown script"
 
+def leb128(hex):
+    r = 0
+    for i in range(int(len(hex) / 2)):
+        r += (int(hex[i * 2:(i + 1) * 2], 16) & 0x7f) << (7 * i)
+        if int(hex[i * 2], 16) < 8:
+            return r, hex[(i + 1) * 2:]
+
+
+def hash160(hex):
+    s = hashlib.sha256(binascii.unhexlify(hex)).digest()
+    h = hashlib.new('ripemd160')
+    h.update(s)
+    return h.hexdigest()
+
+
+def checksum(hex):
+    s = hashlib.sha256(binascii.unhexlify(hex)).digest()
+    h = hashlib.sha256(s)
+    return h.hexdigest()[0:8]
+
+
+def encode_base58(hexstring):
+    return base58.b58encode(bytes.fromhex(hexstring))
+
+
+def getAssetId(scriptPubKeyHex, isTestnet):
+    script = hash160(scriptPubKeyHex)
+    # mainnet: 23, testnet:115
+    prefix = 115 if isTestnet else 23
+    script = hex(prefix)[2:] + script
+    script = script + checksum(script)
+    return encode_base58(script)

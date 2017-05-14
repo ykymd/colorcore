@@ -30,7 +30,6 @@ def encode_base58(hexstring):
     return base58.b58encode(bytes.fromhex(hexstring))
 
 
-@staticmethod
 def getAssetId(scriptPubKeyHex, isTestnet):
     script = hash160(scriptPubKeyHex)
     # mainnet: 23, testnet:115
