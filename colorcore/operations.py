@@ -259,9 +259,9 @@ class Controller(object):
             sql = 'update asset_metadata set metadata = %s WHERE asset_id = %s'
             c.execute(sql, (metadata, allList[0]))
             print("add " + allList[0])
-        dbconn.commit()
+        conn.commit()
         c.close()
-        dbconn.close()
+        conn.close()
         #return self.tx_parser((yield from self._process_transaction(transaction, mode)))
         return ""
 
