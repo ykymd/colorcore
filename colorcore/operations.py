@@ -43,7 +43,7 @@ import pytz
 import time
 import functools
 import configparser
-import oautil
+import colorcore.oautil
 import binascii
 
 from bitcoinrpc.authproxy import AuthServiceProxy
