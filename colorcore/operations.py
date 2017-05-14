@@ -43,6 +43,8 @@ import pytz
 import time
 import functools
 import configparser
+import oautil
+import binascii
 
 from bitcoinrpc.authproxy import AuthServiceProxy
 
@@ -59,7 +61,7 @@ class Controller(object):
         self.convert = Convert(configuration.asset_byte)
         self.config = configparser.ConfigParser()
         self.config.read("config.ini")
-        #bitcoin.SelectParams('testnet')
+        bitcoin.SelectParams('testnet')
 
     @asyncio.coroutine
     def getbalance(self,
@@ -228,7 +230,10 @@ class Controller(object):
 
         transaction = builder.issue(issuance_parameters, bytes(metadata, encoding='utf-8'), self._get_fees(fees))
 
-        return self.tx_parser((yield from self._process_transaction(transaction, mode)))
+        assetId = oautil.getAssetId(binascii.hexlify(to_address.to_scriptPubKey()), True)
+        print(assetId)
+        #return self.tx_parser((yield from self._process_transaction(transaction, mode)))
+        return ""
 
     @asyncio.coroutine
     def distribute(self,
