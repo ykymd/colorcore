@@ -247,15 +247,18 @@ class Controller(object):
         )
         c = conn.cursor()
         # 既存のレコードを探す
-        sql = 'select asset_id, metadata from asset_metadata where asset_id = %s'
-        c.execute(sql, (assetId))
+        sql = 'select asset_id from asset_transaction where isIssurance = 1 and from = \'%s\' and asset_id != NULL' % address
+        c.execute(sql)
         allList = c.fetchall()
         if len(allList) == 0:
             sql = 'insert into asset_metadata values (%s, %s)'
             c.execute(sql, (assetId, metadata))
+            print("insert ")
+            print((assetId, metadata))
         elif len(metadata) > 0:
             sql = 'update asset_metadata set metadata = %s WHERE asset_id = %s'
-            c.execute(sql, (metadata, assetId))
+            c.execute(sql, (metadata, allList[0]))
+            print("add " + allList[0])
         dbconn.commit()
         c.close()
         dbconn.close()
