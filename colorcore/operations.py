@@ -247,7 +247,7 @@ class Controller(object):
         )
         c = conn.cursor()
         # 既存のレコードを探す
-        sql = 'select asset_id from asset_transaction where isIssurance = 1 and from = \'%s\' and asset_id != NULL' % address
+        sql = 'select asset_id from asset_transaction where isIssurance = 1 and from = \'%s\' and asset_id is not NULL' % address
         c.execute(sql)
         allList = c.fetchall()
         if len(allList) == 0:
