@@ -262,8 +262,7 @@ class Controller(object):
         conn.commit()
         c.close()
         conn.close()
-        #return self.tx_parser((yield from self._process_transaction(transaction, mode)))
-        return ""
+        return self.tx_parser((yield from self._process_transaction(transaction, mode)))
 
     @asyncio.coroutine
     def distribute(self,
